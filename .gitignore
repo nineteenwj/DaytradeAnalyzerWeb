@@ -1,0 +1,9 @@
+# Ignore all __pycache__ directories and .pyc files in any directory
+**/__pycache__/
+*.pyc
+
+# Ignore the stock_data directory at the root and its contents
+/stock_data/
+
+# Ignore the db.sqlite3 file in the root directory
+db.sqlite3

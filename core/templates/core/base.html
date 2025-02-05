@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}DayTrade Analyzer Web{% endblock %}</title>
+    <!-- Material-Kit CSS (free version from CDN) -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/material-kit/2.0.7/css/material-kit.min.css" rel="stylesheet">
+    {% block extra_css %}
+        <style>
+          /* Override Bootstrap container to reduce side margins */
+          .container {
+            max-width: 95%;  /* or any value less than 100% to have minimal side gaps */
+            padding-left: 30px;
+            padding-right: 30px;
+          }
+        </style>
+    {% endblock %}
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-transparent bg-primary fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="/" style="color:#000000;">DayTrade Analyzer Web</a>
+        </div>
+    </nav>
+    <!-- Main Content Container -->
+    <div class="container-fluid" style="margin-top:100px;">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+        {% block content %}{% endblock %}
+    </div>
+    <!-- Material-Kit JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/material-kit/2.0.7/js/material-kit.min.js"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

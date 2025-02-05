@@ -1,0 +1,12 @@
+# Configuration file for DayTrade Analyzer Web
+# storage_method: "csv" or "postgres"
+storage_method: csv
+csv_data_dir: stock_data
+
+database:
+  ENGINE: django.db.backends.postgresql
+  NAME: daytrade_db
+  USER: your_user
+  PASSWORD: your_password
+  HOST: localhost
+  PORT: 5432
