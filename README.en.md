@@ -1,6 +1,6 @@
 # DayTrade Analyzer Web
 
-A Django web application for intraday trading analysis and simulation. This project uses Django as the backend and Material-Kit (free version) for the frontend. It supports fetching US stock data via yfinance, displaying candlestick charts with technical indicators, and simulating trades.
+A Django web application for intraday trading analysis and simulation. It supports fetching US stock data, displaying candlestick charts with technical indicators, and simulating trades.
 
 ## Features
 
@@ -12,15 +12,13 @@ A Django web application for intraday trading analysis and simulation. This proj
   Simulate trades for up to 5 dates by inputting Buy Price, Stop Loss (%), and Take Profit (%).
 - **Flexible Data Storage:**  
   Store data either in CSV files or in a PostgreSQL database, as configured in `config.yaml`.
-- **Bilingual Documentation:**  
-  This project includes README files in both English and Chinese.
 
 ## Installation
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/daytrade-analyzer-web.git
-   cd daytrade-analyzer-web
+   git clone git@github.com:nineteenwj/DaytradeAnalyzerWeb.git
+   cd DaytradeAnalyzerWeb
 2. Create and activate a virtual environment:
    ```bash
    python -m venv venv

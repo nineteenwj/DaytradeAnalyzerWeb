@@ -1,26 +1,24 @@
 
 # DayTrade Analyzer Web
 
-这是一个用于日内交易分析和模拟的 Django Web 应用程序。项目后端采用 Django，前端使用 Material-Kit（免费版）实现。支持通过 yfinance 获取美股数据、展示 K 线图及技术指标，并进行交易模拟。
+这是一个用于日内交易分析和模拟的Web 应用程序。项目后端采用 Django，支持获取美股数据、展示 K 线图及技术指标，并进行交易模拟。
 
 ## 功能特点
 
 - **数据获取：**  
-  通过 yfinance 获取美股数据（1 分钟间隔，最近 7 天）。
+  获取美股数据（1 分钟间隔，最近 7 天）。
 - **数据展示：**  
   绘制 K 线图并显示技术指标（如 MA、MACD、RSI 等）。
 - **交易模拟：**  
   针对最多 5 个日期进行交易模拟，输入买入价格、止损百分比和止盈百分比。
 - **灵活的数据存储：**  
   数据可存入 CSV 文件或 PostgreSQL 数据库，配置通过 `config.yaml` 文件进行。
-- **双语文档：**  
-  本项目提供中英文 README 文件。
 
 ## 安装说明
 
 1. 克隆仓库：
    ```bash
-   git clone https://github.com/nineteenwj/daytrade-analyzer-web.git
+   git clone git@github.com:nineteenwj/DaytradeAnalyzerWeb.git
    cd DaytradeAnalyzerWeb
 2. 创建并激活虚拟环境：
    ```bash
