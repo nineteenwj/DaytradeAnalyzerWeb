@@ -28,7 +28,7 @@ from core.data.fetcher import fetch_stock_data
 from core.data.storage import store_stock_data
 from core.analysis.chart import generate_candlestick_chart
 from django.conf import settings
-from core.utils import get_local_data
+from core.data.querier import get_local_data
 
 
 def analysis_index(request):
@@ -38,7 +38,7 @@ def analysis_index(request):
     date_range_form = DateRangeForm()  # This form uses ChoiceField for start_date and end_date.
 
     if request.method == "POST":
-        if "get_stock_data" in request.POST:
+        if "update_stock_data" in request.POST:
             # Process the GET STOCK DATA action.
             ticker_form = TickerForm(request.POST)
             if ticker_form.is_valid():

@@ -1,0 +1,566 @@
+{% extends "core/base.html" %}
+
+{% block title %}Opening Buy Strategy{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <!-- 左边部分：展示股票列表 -->
+        <div class="col-md-4">
+            <h3>Ticker Info</h3>
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"></h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover"
+                               style="width: 100%; border-collapse: collapse; table-layout: auto;">
+                            <thead>
+                            <tr>
+                                <th>Stock Name</th>
+                                <th>Code</th>
+                                <th>Start Date</th>
+                                <th>End Date</th>
+                                <th>Action</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for stock in stocks %}
+                            <tr>
+                                <td>{{ stock.stock_name }}</td>
+                                <td>{{ stock.ticker }}</td>
+                                <td>{{ stock.start_date }}</td>
+                                <td>{{ stock.end_date }}</td>
+                                <td>
+                                    <!-- 展开查看股票详情 -->
+                                    <button class="btn btn-info btn-sm" data-toggle="collapse"
+                                            data-target="#stock-details-{{ stock.ticker }}">View Details
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr id="stock-details-{{ stock.ticker }}" class="collapse">
+                                <td colspan="4">
+                                    <!-- 展示盘前、盘中、盘后数据和蜡烛图 -->
+                                    <p>Pre-Market: Data</p>
+                                    <p>Intraday: Data</p>
+                                    <p>Post-Market: Data</p>
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h5 class="card-title">Stock Charts for {{ stock.stock_name }}</h5>
+                                            <div id="chart_{{ stock.ticker }}"> <!-- Insert chart here --> </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- 添加股票卡片按钮 -->
+                    <button class="btn btn-success btn-sm" onclick="addStockCard()">Add Stock Search Card</button>
+
+                    <!-- 查询股票价格卡片 -->
+                    <div id="stock-search-list">
+                        <!-- 卡片模板 -->
+                        <div class="card mt-4" id="stock-card-template" style="display: none;">
+                            <div class="card-body">
+                                <form class="stock-price-form" method="post" action="{% url 'query_stock_data' %}"
+                                      onsubmit="fetchStockPrice(event)">
+                                    {% csrf_token %}
+
+                                    <!-- 查询表单 -->
+                                    <div class="row">
+                                        <!-- 股票代码 -->
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label for="query_stock_code">Stock Code</label>
+                                                <input type="text" class="form-control query_stock_code"
+                                                       name="query_stock_code"
+                                                       placeholder="Enter Stock Code" required>
+                                            </div>
+                                        </div>
+
+                                        <!-- 开始日期 -->
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="start_date">Start Date</label>
+                                                <input type="date" class="form-control start_date" name="start_date"
+                                                       required>
+                                            </div>
+                                        </div>
+
+                                        <!-- 结束日期 -->
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="end_date">End Date</label>
+                                                <input type="date" class="form-control end_date" name="end_date"
+                                                       required>
+                                            </div>
+                                        </div>
+                                        <!-- 查询按钮 -->
+                                        <div class="col-md-1">
+                                            <div class="form-group">
+                                                <label for="search_action">Action</label>
+                                                <button type="submit" class="btn btn-primary btn-sm">Q</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+
+                                <!-- 显示查询结果 -->
+                                <div class="mt-4 " id="price-results" style="display: block;">
+                                    <h6>Pre-market and Intraday Prices</h6>
+                                    <table class="table table-bordered">
+                                        <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Pre-market Open</th>
+                                            <th>Pre-market Close</th>
+                                            <th>Pre-market Change</th>
+                                            <th>Intraday Open</th>
+                                            <th>Intraday Close</th>
+                                            <th>Intraday Change</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody class="price-table-body">
+                                        <!-- Data will be inserted dynamically -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 右边部分：展示模拟交易 -->
+        <div class="col-md-8">
+            <h3>Auto simulation</h3>
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Opening Trading Strategies</h5>
+                </div>
+                <div class="card-body">
+                    <form id="auto-opening-trading-form" method="post" action="{% url 'opening_auto_simulation' %}"
+                          onsubmit="autoOpeningTrade(event)">
+                         {% csrf_token %}
+
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="start_date" class="bmd-label-floating">Start Date</label>
+                                    {{ form.start_date }}
+                                </div>
+                                <div class="form-group">
+                                    <label for="pc_code" class="bmd-label-floating">PC Code</label>
+                                    {{ form.pc_code }}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="end_date" class="bmd-label-floating">End Date</label>
+                                    {{ form.end_date }}
+                                </div>
+                                <div class="form-group">
+                                    <label for="buy_code1" class="bmd-label-floating">Buy Code 1</label>
+                                    {{ form.buy_code1 }}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="strategy" class="bmd-label-floating">Strategy</label>
+                                    {{ form.strategy }}
+                                </div>
+                                <div class="form-group">
+                                    <label for="buy_code2" class="bmd-label-floating">Buy Code 2</label>
+                                    {{ form.buy_code2 }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="buy_price_up_ratio" class="bmd-label-floating">Buy Price Up
+                                        Ratio</label>
+                                    {{ form.buy_price_up_ratio }}
+                                </div>
+
+
+                                <div class="form-group">
+                                    <label for="quantity" class="bmd-label-floating">Quantity</label>
+                                    {{ form.quantity }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="take_profit" class="bmd-label-floating">Take Profit</label>
+                                    {{ form.take_profit }}
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="stop_loss" class="bmd-label-floating">Stop Loss</label>
+                                    {{ form.stop_loss }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!---->
+                        <button type="submit" class="btn btn-primary">Simulate</button>
+                    </form>
+
+                    <div class="table-responsive" id="auto-results-container" style="margin-top: 20px;"></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <form class="trade-form" method="post" action="{% url 'calculate_profitloss' %}"
+                          onsubmit="calculateProfitLoss(event)">
+                        {% csrf_token %}
+                        <table class="table table-bordered" id="simulation-table">
+                            <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Pc Code</th>
+                                <th>Strategy</th>
+                                <th>Buy Code</th>
+                                <th>Buy Price</th>
+                                <th>Quantity</th>
+                                <th>Take Profit</th>
+                                <th>Stop Loss</th>
+                                <th>Sell Price</th>
+                                <th style="width: 200px;">Profit/Loss</th>
+                                <th style="width: 200px;">Sell Time</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <!-- 模拟交易行 -->
+                            <tr>
+                                <td><input type="date" name="date" class="form-control" required></td>
+                                <td><input type="text" name="pre_condition_stock_code" class="form-control"
+                                           placeholder="Enter Stock Code" required></td>
+                                <td>
+                                    <select name="strategy" class="form-control" required>
+                                        <option value="pre_market_close">Pre-market Close</option>
+                                        <option value="pre_market_avg">Pre-market Avg</option>
+                                        <option value="pre_market_weighted">Pre-market Weighted</option>
+                                        <option value="intraday_open">Intraday Open</option>
+                                    </select>
+                                </td>
+                                <td><input type="text" name="buy_stock_code" class="form-control"
+                                           placeholder="Enter Buy Stock Code" required></td>
+                                <td><input type="number" name="buy_price" class="form-control"
+                                           placeholder="Enter Buy Price"
+                                           required step="any"></td>
+                                <td><input type="number" name="quantity" class="form-control" value="10" required></td>
+                                <td><input type="number" name="take_profit" class="form-control" value="1" required>
+                                </td>
+                                <td><input type="number" name="stop_loss" class="form-control" value="1" required></td>
+                                <td><input type="text" name="sell_price" class="form-control" readonly></td>
+                                <td><input type="text" name="profit_loss" class="form-control" readonly></td>
+                                <td><input type="text" name="sell_time" class="form-control" readonly></td>
+                            </tr>
+                            </tbody>
+                        </table>
+
+                        <!-- 提交按钮 -->
+                        <button type="submit" class="btn btn-primary">Simulate Trade</button>
+                    </form>
+
+                    <!-- 添加模拟交易行按钮 -->
+                    <button type="button" class="btn btn-secondary mt-4" onclick="addSimulationRow()">Add Simulation Row
+                    </button>
+
+                    <!-- 如果模拟交易的结果不显示在下方表格，可以通过下面的按钮来清空当前显示的内容 -->
+                    <button type="button" class="btn btn-secondary mt-4" onclick="clearSimulation()">Clear Results
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 动态添加股票卡片
+    function addStockCard() {
+        const stockList = document.getElementById('stock-search-list');
+        const stockCardTemplate = document.getElementById('stock-card-template');
+        const newCard = stockCardTemplate.cloneNode(true);  // 克隆模板
+
+        newCard.style.display = 'block';  // 显示新卡片
+        stockList.appendChild(newCard);  // 将新卡片添加到 stock list
+
+        // 清空输入框，准备下次使用
+        const form = newCard.querySelector('form');
+        form.querySelector('.query_stock_code').value = '';
+        form.querySelector('.start_date').value = '';
+        form.querySelector('.end_date').value = '';
+    }
+
+    // 查询股票价格并填充结果
+    function fetchStockPrice(event) {
+        event.preventDefault(); // 防止表单提交
+
+        const form = event.target;
+        const stockCode = form.querySelector('.query_stock_code').value;
+        const startDate = form.querySelector('.start_date').value;
+        const endDate = form.querySelector('.end_date').value;
+
+        // 使用 fetch API 向后端发送数据
+        fetch("{% url 'query_stock_data' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': form.querySelector('[name="csrfmiddlewaretoken"]').value  // CSRF token
+            },
+            body: new URLSearchParams({
+                query_stock_code: stockCode,
+                start_date: startDate,
+                end_date: endDate
+            })
+        })
+        .then(response => response.json())  // 解析服务器返回的数据
+        .then(data => {
+            // 这里可以处理返回的数据并更新页面上的内容
+            console.log(data);
+            result = JSON.parse(data);
+            // 从表单的父容器中查找 .price-table-body 元素
+            const container = form.parentElement;
+            const priceTableBody = container.querySelector('.price-table-body');
+            if (!priceTableBody) {
+               console.error("price-table-body element not found!");
+               return;
+            }
+            priceTableBody.innerHTML = ""; // 清空现有数据
+
+            for (let i =0; i < result.length; i++){
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${result[i].date}</td>
+                    <td>${result[i].pre_market_open}</td>
+                    <td>${result[i].pre_market_close}</td>
+                    <td>${result[i].pre_market_change}</td>
+                    <td>${result[i].intraday_open}</td>
+                    <td>${result[i].intraday_close}</td>
+                    <td>${result[i].intraday_change}</td>
+                `;
+                priceTableBody.appendChild(row);
+            }
+
+
+            // 显示查询结果
+            const resultsSection = document.getElementById("price-results");
+            if (resultsSection) {
+                resultsSection.style.display = 'block';
+            } else {
+                console.log("Element with id 'price-results' not found");
+            }
+        })
+        .catch(error => {
+            console.log('Error:', error);
+        });
+    }
+
+
+    //自动计算买卖盈亏
+    function autoOpeningTrade(event) {
+        event.preventDefault();
+        const form = document.getElementById('auto-opening-trading-form');
+        const formData = new FormData(form);
+        fetch("{% url 'opening_auto_simulation' %}", {
+                method: 'POST',
+                body: formData
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+              const resultsContainer = document.getElementById('auto-results-container');
+              resultsContainer.innerHTML = '';
+              if (data.results && data.results.length > 0) {
+                  const table = document.createElement('table');
+                  table.className = 'table table-striped';
+                  table.setAttribute('style', 'width: 100%; text-align: center; border-collapse: collapse; table-layout: auto;');
+
+                  const thead = document.createElement('thead');
+
+                  const headerRow = document.createElement('tr');
+                  ['Date', 'Refer Code', 'Strategy', 'Strategy Result', 'Refer Price', 'Buy', 'Buy Price Up Ratio', 'Buy Price', 'Quantity', 'Take Profit', 'Stop Loss', 'Sell Price', 'Profit/Loss Ratio', 'Profit/Loss', 'Sell Time'].forEach(text => {
+                      const th = document.createElement('th');
+                      th.textContent = text;
+                      headerRow.appendChild(th);
+                  });
+                  thead.appendChild(headerRow);
+                  table.appendChild(thead);
+
+                  const tbody = document.createElement('tbody');
+                  tbody.classname = 'table table-striped';
+                  data.results.forEach(result => {
+                      const row = document.createElement('tr');
+                      Object.entries(result).forEach(([key, cellData]) => {
+                        const td = document.createElement('td');
+                        // 添加 "%" 符号：对于 strategy_result, buy_price_up_ratio, stop_loss, profit_loss_ratio
+                        if (['take_profit', 'strategy_result', 'buy_price_up_ratio', 'stop_loss'].includes(key)) {
+                            td.textContent = `${cellData}%`;  // 添加百分号
+                        } else if (key === 'profit_loss_ratio' || key === 'profit_loss') {
+                            // 为 profit_loss_ratio 和 profit_loss 添加颜色和加粗
+                            if (key === 'profit_loss_ratio'){
+                                td.textContent = `${cellData}%`;
+                            }
+                            else{
+                                td.textContent = cellData;
+                            }
+                            if (cellData > 0) {
+                                td.style.color = 'green';  // 正数为绿色
+                                td.style.fontWeight = 'bold';  // 加粗
+                            } else if (cellData < 0) {
+                                td.style.color = 'red';  // 负数为红色
+                                td.style.fontWeight = 'bold';  // 加粗
+                            }
+                        } else {
+                            td.textContent = cellData;
+                        }
+                        row.appendChild(td);
+                        });
+
+                      tbody.appendChild(row);
+                  });
+                  table.appendChild(tbody);
+
+                  resultsContainer.appendChild(table);
+              }
+        })
+        .catch(error => {
+            console.error('There was a problem with the fetch operation:', error);
+        });
+    }
+
+
+    // 计算盈亏和卖出时间，并更新表格
+    function calculateProfitLoss(event) {
+        event.preventDefault(); // 防止表单提交
+
+        const table = document.getElementById('simulation-table');
+        const form = event.target;
+        const tableData = [];  // 存储表格数据
+
+        // 遍历表格行数据并存入 tableData 数组
+        for (let i = 1; i < table.rows.length; i++) {  // 从 1 开始跳过表头
+            const row = table.rows[i];
+            const rowData = {
+                date: row.cells[0].querySelector('input').value,
+                precon_code: row.cells[1].querySelector('input').value,
+                strategy: row.cells[2].querySelector('select').value,
+                buy_code: row.cells[3].querySelector('input').value,
+                buy_price: row.cells[4].querySelector('input').value,
+                quantity: row.cells[5].querySelector('input').value,
+                sell_price: row.cells[6].querySelector('input').value,
+                take_profit: row.cells[7].querySelector('input').value,
+                stop_loss: row.cells[8].querySelector('input').value,
+            };
+            tableData.push(rowData);
+        }
+        console.log(tableData)
+        tableDataStr = JSON.stringify(tableData)
+
+        fetch("{% url 'calculate_profitloss' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': form.querySelector('[name="csrfmiddlewaretoken"]').value  // CSRF token
+            },
+            body: new URLSearchParams({
+                trade_data: tableDataStr
+            })
+        })
+        .then(response => response.json())  // 解析服务器返回的数据
+        .then(data => {
+            console.log(data)
+            result = JSON.parse(data);
+            if (result.status === 'success') {
+                const rows = table.rows;
+                for (let i = 1; i < rows.length; i++) {
+                    const row = rows[i];
+
+                    // 返回的数据中的数据与行的顺序匹配
+                    // 填充 Profit/Loss 和 Sell Time,注意：i - 1，因为我们跳过了表头
+                    row.cells[8].querySelector('input').value = result.simulate[i-1].result.sell_price;
+                    row.cells[9].querySelector('input').value = result.simulate[i-1].result.profit_loss;
+                    row.cells[10].querySelector('input').value = result.simulate[i-1].result.sell_time;
+                }
+            }
+            else{
+                console.log('get data failure:'+data.status)
+            }
+        })
+        .catch(error => {
+            console.log('Error:', error);
+        });
+    }
+
+    // 清空结果
+    function clearSimulation() {
+        const table = document.getElementById('simulation-table');
+        const rows = table.rows;
+
+        // 清空每一行的盈亏和卖出时间
+        for (let i = 1; i < rows.length; i++) {
+            const row = rows[i];
+            row.cells[8].children[0].value = '';
+            row.cells[9].children[0].value = '';
+        }
+    }
+
+    // 动态添加模拟交易行
+    function addSimulationRow() {
+        const table = document.getElementById('simulation-table').getElementsByTagName('tbody')[0];
+        const newRow = table.insertRow(table.rows.length);
+
+        // 向新行中添加所有单元格
+        for (let i = 0; i < 10; i++) {
+            const cell = newRow.insertCell(i);
+            if (i === 0) {
+                cell.innerHTML = `<input type="date" name="date" class="form-control" required>`;
+            } else if (i === 1) {
+                cell.innerHTML = `<input type="text" name="pre_condition_stock_code" class="form-control" placeholder="Enter Stock Code" required>`;
+            } else if (i === 2) {
+                cell.innerHTML = `<select name="strategy" class="form-control" required>
+                                    <option value="pre_market_close">Pre-market Close</option>
+                                    <option value="pre_market_avg">Pre-market Avg</option>
+                                    <option value="pre_market_weighted">Pre-market Weighted</option>
+                                    <option value="intraday_open">Intraday Open</option>
+                                  </select>`;
+            } else if (i === 3) {
+                cell.innerHTML = `<input type="text" name="buy_stock_code" class="form-control" placeholder="Enter Buy Stock Code" required>`;
+            } else if (i === 4) {
+                cell.innerHTML = `<input type="number" name="buy_price" class="form-control" placeholder="Enter Buy Price" required step="any">`;
+            } else if (i === 5) {
+                cell.innerHTML = `<input type="number" name="quantity" class="form-control" value="10" required>`;
+            } else if (i === 6) {
+                cell.innerHTML = `<input type="number" name="take_profit" class="form-control" value="1" required>`;
+            } else if (i === 7) {
+                cell.innerHTML = `<input type="number" name="stop_loss" class="form-control" value="1" required>`;
+            } else if (i === 8) {
+                cell.innerHTML = `<input type="text" name="profit_loss" class="form-control" readonly>`;
+            } else if (i === 9) {
+                cell.innerHTML = `<input type="text" name="sell_time" class="form-control" readonly>`;
+            }
+        }
+    }
+
+
+
+
+
+
+
+</script>
+{% endblock %}

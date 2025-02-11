@@ -30,13 +30,20 @@ def simulate_trade(buy_price, stop_loss, take_profit, minute_data):
         # Check the prices in the order: Open, Low, High, Close
         prices = [row['Open'], row['Low'], row['High'], row['Close']]
         for price in prices:
+            sell_time = 0
             if price < buy_price:
                 loss_pct = (buy_price - price) / buy_price * 100.0
-                if loss_pct > stop_loss:
-                    return -round(loss_pct, 2)
+                if loss_pct > stop_loss:#如果蜡烛图最低点比止损比例大，则价格肯定到过止损点，按止损比例计算
+                    result_value = -round(stop_loss, 2)
+                    sell_price = buy_price * (1 - stop_loss/100)
+                    sell_time = idx.strftime('%Y-%m-%d %H:%M:%S')
+                    return {'profit_loss':result_value, 'sell_time':sell_time, 'buy_price': buy_price, 'sell_price':  round(price,2)}
             elif price > buy_price:
                 profit_pct = (price - buy_price) / buy_price * 100.0
                 if profit_pct > take_profit:
-                    return round(profit_pct, 2)
+                    result_value = round(profit_pct, 2)
+                    sell_time = idx.strftime('%Y-%m-%d %H:%M:%S')
+                    return {'profit_loss':result_value, 'sell_time':sell_time, 'buy_price': buy_price, 'sell_price':  round(price,2)}
         # Continue to next minute if no condition met
-    return 0.0
+    return {'profit_loss':0, 'sell_time':0, 'buy_price': 0, 'sell_price': 0}
+

@@ -7,3 +7,8 @@
 
 # Ignore the db.sqlite3 file in the root directory
 db.sqlite3
+
+# Ignore all .DS_Store
+**/.DS_Store
+
+/core/migrations/

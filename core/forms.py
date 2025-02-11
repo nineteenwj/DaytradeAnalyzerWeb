@@ -2,6 +2,8 @@
 Define Django forms for user input.
 """
 from django import forms
+from django.contrib.auth.forms import UserCreationForm
+from .models import CustomUser
 
 class TickerForm(forms.Form):
     """
@@ -42,3 +44,80 @@ class DateRangeForm(forms.Form):
         super().__init__(*args, **kwargs)
         self.fields['start_date'].choices = date_choices
         self.fields['end_date'].choices = date_choices
+
+class LoginForm(forms.Form):
+    username = forms.CharField(
+        widget=forms.TextInput(
+            attrs={
+                "placeholder": "Username",
+                "class": "form-control"
+            }
+        ))
+    password = forms.CharField(
+        widget=forms.PasswordInput(
+            attrs={
+                "placeholder": "Password",
+                "class": "form-control"
+            }
+        ))
+
+class SignUpForm(UserCreationForm):
+    username = forms.CharField(
+        widget=forms.TextInput(
+            attrs={
+                "placeholder": "Username",
+                "class": "form-control"
+            }
+        ))
+    email = forms.EmailField(
+        widget=forms.EmailInput(
+            attrs={
+                "placeholder": "Email",
+                "class": "form-control"
+            }
+        ))
+    password1 = forms.CharField(
+        widget=forms.PasswordInput(
+            attrs={
+                "placeholder": "Password",
+                "class": "form-control"
+            }
+        ))
+    password2 = forms.CharField(
+        widget=forms.PasswordInput(
+            attrs={
+                "placeholder": "Password check",
+                "class": "form-control"
+            }
+        ))
+
+    class Meta:
+        model = CustomUser
+        fields = ('username', 'email', 'password1', 'password2')
+
+class ResetPasswordForm(forms.Form):
+    email = forms.EmailField(
+        widget=forms.EmailInput(
+            attrs={
+                "placeholder": "Email",
+                "class": "form-control"
+            }
+        ))
+
+class TradingOpeningForm(forms.Form):
+    start_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
+    end_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
+    pc_code = forms.CharField(max_length=10)
+    strategy_choices = [
+        ('Pre-market Close', 'Pre-market Close'),
+        ('Pre-market Avg', 'Pre-market Avg'),
+        ('Pre-market Weighted', 'Pre-market Weighted'),
+        ('Intraday Open', 'Intraday Open')
+    ]
+    strategy = forms.ChoiceField(choices=strategy_choices)
+    buy_code1 = forms.CharField(max_length=10)
+    buy_code2 = forms.CharField(max_length=10)
+    buy_price_up_ratio = forms.FloatField()
+    quantity = forms.IntegerField(initial=10)
+    take_profit = forms.FloatField()
+    stop_loss = forms.FloatField()

@@ -41,6 +41,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'core.middleware.AuthenticationMiddleware',  # 添加这行
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -86,6 +87,18 @@ else:
         }
     }
 
+AUTH_USER_MODEL = 'core.CustomUser'  # 使用自定义用户模型
+
+LOGIN_URL = '/login/'  # 设置登录页面的URL
+LOGIN_REDIRECT_URL = '/'  # 登录成功后的重定向URL
+
+# 邮件设置（用于密码重置）
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.qq.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'rss4kindle@qq.com'
+EMAIL_HOST_PASSWORD = 'pdvemudtrazvdcef'
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [

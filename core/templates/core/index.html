@@ -1,200 +1,106 @@
 {% extends "core/base.html" %}
 {% load static %}
 
-{% block title %}DayTrade Analyzer Web{% endblock %}
+{% block title %}Dashboard{% endblock %}
 
 {% block content %}
-<div class="container">
+<div class="container-fluid px-4">
+  <h2 class="mt-4">Trading Dashboard</h2>
+  
   <div class="row">
-    <!-- 左侧：包含获取股票数据和图表设置 -->
-    <div class="col-md-2">
-      <!-- 卡片1：获取股票数据 -->
-      <div class="card">
-        <div class="card-header card-header-primary">
-          <h4 class="card-title">Fetch Stock Data</h4>
+    <!-- Left Section (7/12) - Stock List -->
+    <div class="col-md-7">
+      <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">Daytrade Analyzer</h5>
         </div>
+        
         <div class="card-body">
-          <form method="post">
+          <!-- New Stock Addition Form -->
+          <form method="post" class="d-flex gap-2 justify-content-end">
             {% csrf_token %}
-            {{ ticker_form.errors }}
-            <div class="form-group">
-              {{ ticker_form.ticker.label_tag }}
-              {{ ticker_form.ticker }}
-            </div>
-            <button type="submit" name="get_stock_data" class="btn btn-primary">GET STOCK DATA</button>
+            <input type="text" name="new_stock" class="form-control form-control-sm" style="width:200px;" placeholder="Enter ticker">
+            <button type="submit" class="btn btn-sm btn-warning">ADD</button>
           </form>
-        </div>
-      </div>
-      <br>
-      <!-- 卡片2：图表设置（下拉菜单选择 start_date 和 end_date） -->
-      <div class="card">
-        <div class="card-header card-header-info">
-          <h4 class="card-title">Chart Settings</h4>
-        </div>
-        <div class="card-body">
-          <form method="post">
-            {% csrf_token %}
-            {{ date_range_form.errors }}
-            <!-- 隐藏字段，传递已获取的 ticker -->
-            <input type="hidden" name="ticker_hidden" value="{{ ticker }}">
-            <div class="form-group">
-              {{ date_range_form.start_date.label_tag }}
-              {{ date_range_form.start_date }}
-            </div>
-            <div class="form-group">
-              {{ date_range_form.end_date.label_tag }}
-              {{ date_range_form.end_date }}
-            </div>
-            <div class="form-group">
-              {{ date_range_form.interval.label_tag }}
-              {{ date_range_form.interval }}
-            </div>
-            <button type="submit" name="show_candlestick" class="btn btn-info">SHOW CANDLESTICK</button>
-          </form>
-        </div>
-      </div>
-    </div>
-
-    <!-- 中间：图表展示区域 -->
-    <div class="col-md-6">
-      <div class="card">
-        <div class="card-header card-header-warning">
-          <h4 class="card-title">Candlestick & Volume Chart</h4>
-        </div>
-        <div class="card-body">
-          {% if chart %}
-            <img src="data:image/png;base64,{{ chart }}" class="img-fluid" alt="Candlestick Chart">
+          {% if stocks %}
+          <div class="table-responsive">
+            <table class="table table-striped table-hover table-bordered">
+              <thead>
+                <tr>
+                  <th>Stock Name</th>
+                  <th>Code</th>
+                  <th>Start Date</th>
+                  <th>End Date</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for stock in stocks %}
+                <tr>
+                  <td>
+                    <a href="{% url 'index' %}?ticker={{ stock.ticker }}">{{ stock.stock_name }}</a>
+                  </td>
+                  <td>{{ stock.ticker }}</td>
+                  <td>{{ stock.start_date }}</td>
+                  <td>{{ stock.end_date }}</td>
+                  <td>
+                    <form method="post" action="{% url 'update_stock' stock.ticker %}">
+                      {% csrf_token %}
+                      <button type="submit" class="btn btn-sm btn-warning">Update</button>
+                    </form>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
           {% else %}
-            <p>No chart available.</p>
-          {% endif %}
-          <br>
-          {% if price_list %}
-            <h5>Price Details:</h5>
-            <div class="table-responsive">
-              <table class="table table-bordered table-striped" style="width: 100%;">
-                <thead>
-                  <tr>
-                    <th>Date</th>
-                    <th>Open</th>
-                    <th>High</th>
-                    <th>Low</th>
-                    <th>Close</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {% for price in price_list %}
-                    <tr>
-                      <td>{{ price.date }}</td>
-                      <td>{{ price.open }}</td>
-                      <td>{{ price.high }}</td>
-                      <td>{{ price.low }}</td>
-                      <td>{{ price.close }}</td>
-                    </tr>
-                  {% endfor %}
-                </tbody>
-              </table>
-            </div>
+          <p class="text-center my-3">No stocks found.</p>
           {% endif %}
         </div>
       </div>
     </div>
 
-    <!-- 右侧：模拟交易面板 -->
-    <div class="col-md-4">
-      <div class="card">
-        <div class="card-header card-header-success">
-          <h4 class="card-title">Trading Simulation</h4>
+    <!-- Right Section (5/12) - Trading Strategies -->
+    <div class="col-md-5">
+      <div class="card mb-4">
+        <div class="card-header">
+          <h5 class="mb-0">Trading Strategies</h5>
         </div>
         <div class="card-body">
-          <!-- Simulation form with id for AJAX handling -->
-          <form id="simulationForm" method="post" action="{% url 'simulate' %}">
-            {% csrf_token %}
-            <!-- 隐藏字段，传递已获取的 ticker -->
-            <input type="hidden" name="ticker_hidden" value="{{ ticker }}">
-            <div class="table-responsive">
-              <table class="table" id="simulationTable">
-                <thead>
+          {% if strategies %}
+          <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Strategy Name</th>
+                  <th>Description</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for strategy in strategies %}
                   <tr>
-                    <th style="min-width:120px;">Date</th>
-                    <th>Buy Price</th>
-                    <th>Stop Loss (%)</th>
-                    <th>Take Profit (%)</th>
-                    <th>Result</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {% for i in "12345"|make_list %}
-                  <tr>
+                    <td><a href="{% url strategy.url %}" class="text-primary">{{ strategy.name }}</a></td>
+                    <td>{{ strategy.description }}</td>
                     <td>
-                      <select class="form-control" name="sim_date_{{ forloop.counter }}" style="min-width:120px;">
-                        {% if date_options %}
-                          {% for date in date_options %}
-                            <option value="{{ date }}">{{ date }}</option>
-                          {% endfor %}
-                        {% else %}
-                          <option value="">--</option>
-                        {% endif %}
-                      </select>
+                      {% if strategy.status == 'active' %}
+                        <span class="badge bg-success">Active</span>
+                      {% elif strategy.status == 'testing' %}
+                        <span class="badge bg-warning">Testing</span>
+                      {% else %}
+                        <span class="badge bg-secondary">Inactive</span>
+                      {% endif %}
                     </td>
-                    <td><input type="text" class="form-control" name="buy_price_{{ forloop.counter }}" value="0"></td>
-                    <td><input type="text" class="form-control" name="stop_loss_{{ forloop.counter }}" value="0"></td>
-                    <td><input type="text" class="form-control" name="take_profit_{{ forloop.counter }}" value="0"></td>
-                    <td><input type="text" class="form-control result-field" name="result_{{ forloop.counter }}" readonly></td>
                   </tr>
-                  {% endfor %}
-                </tbody>
-              </table>
-            </div>
-            <button type="submit" name="simulate_all" class="btn btn-success">Simulate All</button>
-          </form>
+                {% endfor %}
+              </tbody>
+            </table>
+          {% else %}
+          <p class="text-center my-3">No trading strategies available.</p>
+          {% endif %}
         </div>
       </div>
     </div>
   </div>
 </div>
-{% endblock %}
-
-{% block extra_js %}
-<!-- Include jQuery for AJAX if not already loaded -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-  $(document).ready(function(){
-    $("#simulationForm").submit(function(e){
-      e.preventDefault(); // Prevent default form submission
-      var formData = $(this).serialize();
-      console.log(formData)
-      $.ajax({
-        url: $(this).attr('action'),
-        type: 'POST',
-        data: formData,
-        dataType: 'json',
-        success: function(response){
-          var results = response.sim_results;
-          // Update each row's result column
-          $("#simulationTable tbody tr").each(function(index){
-            var resultObj = results[index];
-
-            var resultField = $(this).find("input.result-field");
-            if(resultObj.result === null) {
-              resultField.val("Invalid input");
-              resultField.css({"font-weight": "normal", "color": "inherit"});
-            } else {
-              resultField.val(resultObj.result);
-              if(resultObj.result_type === "positive"){
-                resultField.css({"font-weight": "bold", "color": "green"});
-              } else if(resultObj.result_type === "negative"){
-                resultField.css({"font-weight": "bold", "color": "red"});
-              } else {
-                resultField.css({"font-weight": "normal", "color": "inherit"});
-              }
-            }
-          });
-        },
-        error: function(xhr, status, error){
-          alert("Error during simulation: " + error);
-        }
-      });
-    });
-  });
-</script>
 {% endblock %}

@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
+{% load static %}
 <head>
     <meta charset="UTF-8">
     <title>{% block title %}DayTrade Analyzer Web{% endblock %}</title>
     <!-- Material-Kit CSS (free version from CDN) -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/material-kit/2.0.7/css/material-kit.min.css" rel="stylesheet">
+    <link href="{% static 'material-kit/css/material-kit.min.css' %}" rel="stylesheet">
     {% block extra_css %}
         <style>
           /* Override Bootstrap container to reduce side margins */
@@ -13,6 +14,12 @@
             padding-left: 30px;
             padding-right: 30px;
           }
+        table {
+            font-size: 14px; /* 表格内容字体 */
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: auto;
+        }
         </style>
     {% endblock %}
 </head>
@@ -33,7 +40,7 @@
         {% block content %}{% endblock %}
     </div>
     <!-- Material-Kit JS -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/material-kit/2.0.7/js/material-kit.min.js"></script>
+    <script src="{% static 'material-kit/js/material-kit.min.js' %}"></script>
     {% block extra_js %}{% endblock %}
 </body>
 </html>

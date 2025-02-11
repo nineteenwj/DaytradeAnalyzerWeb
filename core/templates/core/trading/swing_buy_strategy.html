@@ -1,0 +1,220 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}DayTrade Analyzer Web{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="row">
+    <!-- 左侧：包含获取股票数据和图表设置 -->
+    <div class="col-md-2">
+      <!-- 卡片1：获取股票数据 -->
+      <div class="card">
+        <div class="card-header card-header-primary">
+          <h4 class="card-title">Fetch Stock Data</h4>
+        </div>
+        <div class="card-body">
+          <form method="post">
+            {% csrf_token %}
+            {{ ticker_form.errors }}
+            <!-- Ticker input on one line -->
+            <div class="form-group row align-items-center">
+              <label class="col-form-label" style="margin-right: 10px;">{{ ticker_form.ticker.label }}</label>
+              <div>
+                {{ ticker_form.ticker }}
+              </div>
+            </div>
+
+            <!-- Hidden field to hold the ticker value -->
+            <input type="hidden" name="ticker_hidden" value="{{ ticker }}">
+
+            <!-- Button for GET LOCAL DATA -->
+            <div class="form-group">
+              <button type="submit" name="get_stock_data" class="btn btn-primary btn-block">GET LOCAL DATA</button>
+            </div>
+
+            <!-- a hyperlink to trigger an update action -->
+            <p class="text-center">
+              Click to <a href="#"
+                          onclick="document.getElementById('action_field').value='update_stock_data'; document.getElementById('getDataForm').submit(); return false;">
+                          UPDATE
+                         </a> stock data.
+            </p>
+            <!-- Hidden field to indicate which action is triggered -->
+            <input type="hidden" name="action" id="action_field" value="">
+          </form>
+        </div>
+      </div>
+      <br>
+      <!-- 卡片2：图表设置（下拉菜单选择 start_date 和 end_date） -->
+      <div class="card">
+        <div class="card-header card-header-info">
+          <h4 class="card-title">Chart Settings</h4>
+        </div>
+        <div class="card-body">
+          <form method="post">
+            {% csrf_token %}
+            {{ date_range_form.errors }}
+            <!-- 隐藏字段，传递已获取的 ticker -->
+            <input type="hidden" name="ticker_hidden" value="{{ ticker }}">
+            <div class="form-group">
+              {{ date_range_form.start_date.label_tag }}
+              {{ date_range_form.start_date }}
+            </div>
+            <div class="form-group">
+              {{ date_range_form.end_date.label_tag }}
+              {{ date_range_form.end_date }}
+            </div>
+            <div class="form-group">
+              {{ date_range_form.interval.label_tag }}
+              {{ date_range_form.interval }}
+            </div>
+            <button type="submit" name="show_candlestick" class="btn btn-info">SHOW CANDLESTICK</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- 中间：图表展示区域 -->
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header card-header-warning">
+          <h4 class="card-title">Candlestick & Volume Chart</h4>
+        </div>
+        <div class="card-body">
+          {% if chart %}
+            <img src="data:image/png;base64,{{ chart }}" class="img-fluid" alt="Candlestick Chart">
+          {% else %}
+            <p>No chart available.</p>
+          {% endif %}
+          <br>
+          {% if price_list %}
+            <h5>Price Details:</h5>
+            <div class="table-responsive">
+              <table class="table table-bordered table-striped" style="width: 100%;">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Open</th>
+                    <th>High</th>
+                    <th>Low</th>
+                    <th>Close</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for price in price_list %}
+                    <tr>
+                      <td>{{ price.date }}</td>
+                      <td>{{ price.open }}</td>
+                      <td>{{ price.high }}</td>
+                      <td>{{ price.low }}</td>
+                      <td>{{ price.close }}</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- 右侧：模拟交易面板 -->
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-header card-header-success">
+          <h4 class="card-title">Trading Simulation</h4>
+        </div>
+        <div class="card-body">
+          <!-- Simulation form with id for AJAX handling -->
+          <form id="simulationForm" method="post" action="{% url 'swing_buy_strategy' %}">
+            {% csrf_token %}
+            <!-- 隐藏字段，传递已获取的 ticker -->
+            <input type="hidden" name="ticker_hidden" value="{{ ticker }}">
+            <div class="table-responsive">
+              <table class="table" id="simulationTable">
+                <thead>
+                  <tr>
+                    <th style="min-width:120px;">Date</th>
+                    <th>Buy Price</th>
+                    <th>Stop Loss (%)</th>
+                    <th>Take Profit (%)</th>
+                    <th>Result</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for i in "12345"|make_list %}
+                  <tr>
+                    <td>
+                      <select class="form-control" name="sim_date_{{ forloop.counter }}" style="min-width:120px;">
+                        {% if date_options %}
+                          {% for date in date_options %}
+                            <option value="{{ date }}">{{ date }}</option>
+                          {% endfor %}
+                        {% else %}
+                          <option value="">--</option>
+                        {% endif %}
+                      </select>
+                    </td>
+                    <td><input type="text" class="form-control" name="buy_price_{{ forloop.counter }}" value="0"></td>
+                    <td><input type="text" class="form-control" name="stop_loss_{{ forloop.counter }}" value="0"></td>
+                    <td><input type="text" class="form-control" name="take_profit_{{ forloop.counter }}" value="0"></td>
+                    <td><input type="text" class="form-control result-field" name="result_{{ forloop.counter }}" readonly></td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            <button type="submit" name="simulate_all" class="btn btn-success">Simulate All</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Include jQuery for AJAX if not already loaded -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+  $(document).ready(function(){
+    $("#simulationForm").submit(function(e){
+      e.preventDefault(); // Prevent default form submission
+      var formData = $(this).serialize();
+      console.log(formData)
+      $.ajax({
+        url: $(this).attr('action'),
+        type: 'POST',
+        data: formData,
+        dataType: 'json',
+        success: function(response){
+          var results = response.sim_results;
+          // Update each row's result column
+          $("#simulationTable tbody tr").each(function(index){
+            var resultObj = results[index];
+
+            var resultField = $(this).find("input.result-field");
+            if(resultObj.result === null) {
+              resultField.val("Invalid input");
+              resultField.css({"font-weight": "normal", "color": "inherit"});
+            } else {
+              resultField.val(resultObj.result);
+              if(resultObj.result_type === "positive"){
+                resultField.css({"font-weight": "bold", "color": "green"});
+              } else if(resultObj.result_type === "negative"){
+                resultField.css({"font-weight": "bold", "color": "red"});
+              } else {
+                resultField.css({"font-weight": "normal", "color": "inherit"});
+              }
+            }
+          });
+        },
+        error: function(xhr, status, error){
+          alert("Error during simulation: " + error);
+        }
+      });
+    });
+  });
+</script>
+{% endblock %}
