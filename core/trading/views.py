@@ -203,7 +203,7 @@ def opening_auto_simulation(request):
                 results.append(retVal)
 
                 current_date += timedelta(days=1)
-            print('--------------------', results)
+
 
             return JsonResponse({'results': results})
 

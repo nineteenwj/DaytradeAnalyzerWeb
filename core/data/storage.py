@@ -39,9 +39,6 @@ def store_stock_data(data, ticker, config):
             except Exception as e:
                 raise Exception(f"Error reading existing CSV file: {e}")
 
-            # Convert index to datetime if not already
-            existing_data.index = pd.to_datetime(existing_data.index)
-
             # Determine which dates are already stored.
             # We'll compare date strings (YYYY-MM-DD).
             existing_dates = set(existing_data.index.strftime("%Y-%m-%d"))
@@ -107,9 +104,6 @@ def adjust_data(data):
     Returns:
       DataFrame: The adjusted DataFrame.
     """
-    # Remove timezone info if present
-    if data.index.tz is not None:
-        data.index = data.index.tz_localize(None)
 
     # Define a helper function to determine the market session based on time.
     def get_market_session(dt):

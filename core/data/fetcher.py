@@ -3,6 +3,7 @@ Module to fetch stock data using yfinance.
 """
 import yfinance as yf
 import time
+import pytz
 
 def fetch_stock_data(ticker, period="7d", interval="1m", retries=3, delay=5):
     """
@@ -24,11 +25,15 @@ def fetch_stock_data(ticker, period="7d", interval="1m", retries=3, delay=5):
     for attempt in range(retries):
         try:
             # Attempt to download data, including pre-market and after-hours data
-            data = yf.download(ticker, period=period, interval=interval, prepost=True)
+            ticker = yf.Ticker(ticker)
+            data = ticker.history(period=period, interval=interval, prepost=True)
             # If data is successfully fetched and is not empty, return it
             if not data.empty:
-
-                return data
+                data.index = data.index.tz_convert('US/Eastern')
+                # Remove timezone info if present
+                if data.index.tz is not None:
+                    data.index = data.index.tz_localize(None)
+                return data[['Open', 'High', 'Low', 'Close', 'Volume']]
         except Exception as e:
             print(f"Attempt {attempt + 1} failed: {e}")
         # Wait for a specified delay before retrying
