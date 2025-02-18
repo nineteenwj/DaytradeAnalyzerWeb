@@ -112,19 +112,31 @@ def get_all_stock_list():
     elif storage_method == 'postgres':
         try:
             from core.models import StockData
-            # Query distinct tickers
-            tickers = StockData.objects.values_list('ticker', flat=True).distinct()
+
+            # 查询所有不同的 ticker
+            tickers = set(StockData.objects.values_list('ticker', flat=True))
+            print('---------------ticker_list:', tickers)
+            # 用来存储最终的合并结果
+            stock_list = []
+
             for ticker in tickers:
-                qs = StockData.objects.filter(ticker=ticker).order_by("date")
+
+                # 获取所有与 ticker 相关的记录，并按日期排序
+                qs = StockData.objects.filter(ticker=ticker).order_by('date')
+
                 if qs.exists():
-                    start_date = qs.first().date.strftime("%Y-%m-%d")
-                    end_date = qs.last().date.strftime("%Y-%m-%d")
+                    # 获取最早的日期（start_date）和最晚的日期（end_date）
+                    start_date = qs.first().date.strftime("%Y-%m-%d")  # 最早的日期
+                    end_date = qs.last().date.strftime("%Y-%m-%d")  # 最晚的日期
+
+                    # 添加到 stock_list 中
                     stock_list.append({
                         "ticker": ticker,
-                        "stock_name": ticker,
+                        "stock_name": ticker,  # 这里假设股票名称就是 ticker，具体根据需求调整
                         "start_date": start_date,
                         "end_date": end_date
                     })
+
         except Exception as e:
             print(f"Error retrieving stocks from PostgreSQL: {e}")
     return stock_list
@@ -215,7 +227,7 @@ def query_local_stock_data(ticker, start_date, end_date, interval='1d'):
 
             # Convert query result to pandas DataFrame
             df = pd.DataFrame(list(stock_data_query.values('date', 'open', 'high', 'low', 'close', 'volume')))
-
+            print('--------------df：', df)
             # Resample data by day and calculate daily statistics
             df['date'] = pd.to_datetime(df['date'])
             df.set_index('date', inplace=True)
@@ -310,7 +322,7 @@ def get_previous_intraday_close(ticker, curent_date):
         else:
             print(f"指定的时间点 {target_time} 不在数据中")
             return {}
-
+'''
 def add_stock(new_stock):
     stocks = get_all_stock_list()
     ret = False
@@ -322,16 +334,15 @@ def add_stock(new_stock):
     else:
         try:
             from core.data.fetcher import fetch_stock_data
-            from core.data.storage import store_stock_data
             # Fetch and store stock data (1-minute data, 7 days)
             data = fetch_stock_data(new_stock, period="7d", interval="1m")
-            store_stock_data(data, new_stock, settings.CONFIG)
+            store_stock_data(new_stock, data, settings.CONFIG)
             msg = f"{new_stock} has been added successfully."
             ret = True
         except Exception as e:
             msg = f"Error adding {new_stock}: {e}"
     return {'ret': ret, 'msg': msg}
-
+'''
 
 def get_stock_info_by_date(ticker, date):
 

@@ -1,0 +1,165 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}{{ stock_info.symbol }} Info{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="text-center">Stock Information for {{ stock_info.longName }}</h1>
+    <div class="row">
+        <div class="col-md-7">
+            <!-- Stock Info Card -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h4>Information</h4>
+                </div>
+                <div class="card-body">
+                    <!-- 基本信息 -->
+                    <div class="row">
+                        <h5>Basic Information（基本信息）:</h5>
+                        <div class="col-md-4">
+                            <p><strong>Symbol (股票代码):</strong> {{ stock_info.symbol }}</p>
+                            <p><strong>Exchange (交易所):</strong> {{ stock_info.exchange }}</p>
+                            <p><strong>Industry (行业):</strong> {{ stock_info.industry }}</p>
+                            <p><strong>Sector (行业类别):</strong> {{ stock_info.sector }}</p>
+                        </div>
+                        <div class="col-md-4">
+                            <p><strong>Market Cap (市值):</strong> ${{ stock_info.marketCap|floatformat:2 }}</p>
+                            <p><strong>Volume (成交量):</strong> {{ stock_info.volume }}</p>
+                            <p><strong>Country (国家):</strong> {{ stock_info.country }}</p>
+                            <p><strong>Website (官网):</strong> <a href="{{ stock_info.website }}" target="_blank">{{ stock_info.website }}</a></p>
+                        </div>
+                        <div class="col-md-4">
+                            <p><strong>Previous Close (前一交易日收盘价):</strong> ${{ stock_info.previousClose }}</p>
+                            <p><strong>Open (开盘价):</strong> ${{ stock_info.open }}</p>
+                            <p><strong>Day Low (当天最低价):</strong> ${{ stock_info.dayLow }}</p>
+                            <p><strong>Day High (当天最高价):</strong> ${{ stock_info.dayHigh }}</p>
+                        </div>
+                    </div>
+
+                    <!-- 财务数据 -->
+                    <div class="row mt-4">
+                        <h5>Financial Data（财务数据）:</h5>
+                        <div class="col-md-4">
+                            <p><strong>Trailing PE (市盈率):</strong> {{ stock_info.trailingPE }}</p>
+                            <p><strong>Beta (贝塔值):</strong> {{ stock_info.beta }}</p>
+                            <p><strong>Dividend Rate (股息率):</strong> {{ stock_info.dividendRate }}%</p>
+                            <p><strong>Dividend Yield (股息收益率):</strong> {{ stock_info.dividendYield|floatformat:4 }}%
+                            </p>
+                            <p><strong>Trailing EPS (每股收益):</strong> {{ stock_info.trailingEps }}</p>
+                            <p><strong>Forward EPS (未来每股收益):</strong> {{ stock_info.forwardEps }}</p>
+                            <p><strong>Price-to-Book (市净率):</strong> {{ stock_info.priceToBook }}</p>
+                            <p><strong>Enterprise Value (企业价值):</strong> ${{ stock_info.enterpriseValue|floatformat:2 }}
+                            </p>
+                        </div>
+                        <div class="col-md-4">
+                            <p><strong>Payout Ratio (支付比率):</strong> {{ stock_info.payoutRatio }}</p>
+                            <p><strong>Net Income (净收入):</strong> ${{ stock_info.netIncomeToCommon }}</p>
+                            <p><strong>Price-to-Sales Ratio (市销率):</strong> {{ stock_info.priceToSalesTrailing12Months }}
+                            </p>
+                            <p><strong>Revenue Growth (收入增长):</strong> {{ stock_info.revenueGrowth|floatformat:4 }}%</p>
+                            <p><strong>Operating Cashflow (经营现金流):</strong> ${{ stock_info.operatingCashflow|floatformat:2 }}</p>
+                            <p><strong>Free Cashflow (自由现金流):</strong> ${{ stock_info.freeCashflow|floatformat:2 }}</p>
+                        </div>
+                        <div class="col-md-4">
+                            <p><strong>Gross Margins (毛利率):</strong> {{ stock_info.grossMargins|floatformat:4 }}%</p>
+                            <p><strong>Operating Margins (经营利润率):</strong> {{ stock_info.operatingMargins|floatformat:4 }}%
+                            </p>
+                            <p><strong>EBITDA Margins (EBITDA利润率):</strong> {{ stock_info.ebitdaMargins|floatformat:4 }}%
+                            </p>
+                            <p><strong>EBITDA (税息折旧及摊销前利润):</strong> ${{ stock_info.ebitda|floatformat:2 }}</p>
+                            <p><strong>Revenue (收入):</strong> ${{ stock_info.totalRevenue|floatformat:2 }}</p>
+                            <p><strong>52 Week Low (52周最低价):</strong> ${{ stock_info.fiftyTwoWeekLow }}</p>
+                            <p><strong>52 Week High (52周最高价):</strong> ${{ stock_info.fiftyTwoWeekHigh }}</p>
+                        </div>
+                    </div>
+
+                    <!-- 风险评估 -->
+                    <div class="row mt-4">
+                        <h5>Risk Assessment（风险评估）:</h5>
+                        <div class="col-md-4">
+                            <p><strong>Audit Risk (审计风险):</strong> {{ stock_info.auditRisk }}</p>
+                            <p><strong>Board Risk (董事会风险):</strong> {{ stock_info.boardRisk }}</p>
+                            <p><strong>Compensation Risk (薪酬风险):</strong> {{ stock_info.compensationRisk }}</p>
+                            <p><strong>Shareholder Rights Risk (股东权利风险):</strong> {{ stock_info.shareHolderRightsRisk }}
+                            </p>
+                        </div>
+                        <div class="col-md-4">
+                            <p><strong>Overall Risk (总体风险):</strong> {{ stock_info.overallRisk }}</p>
+                            <p><strong>Debt-to-Equity (负债股本比):</strong> {{ stock_info.debtToEquity }}</p>
+                            <p><strong>Return on Assets (资产回报率):</strong> {{ stock_info.returnOnAssets }}</p>
+                        </div>
+                        <div class="col-md-4">
+                            <p><strong>Return on Equity (股本回报率):</strong> {{ stock_info.returnOnEquity }}</p>
+                            <p><strong>Price-to-Book Ratio (市净率):</strong> {{ stock_info.priceToBook }}</p>
+                            <p><strong>Gross Profits (毛利润):</strong> ${{ stock_info.grossProfits|floatformat:2 }}</p>
+                        </div>
+                    </div>
+
+                    <!-- 公司高管信息 -->
+                    <div class="row mt-4">
+                        <div class="col-md-12">
+                            <h5>Company Officers (公司高管):</h5>
+                            <ul>
+                                {% for officer in stock_info.companyOfficers %}
+                                <li><strong>{{ officer.name }} ({{ officer.title }})</strong> - Total Pay: ${{ officer.totalPay|floatformat:2 }}
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- 业务概述 -->
+                    <div class="row mt-4">
+                        <div class="col-md-12">
+                            <h5>Business Summary (公司概述):</h5>
+                            <p>{{ stock_info.longBusinessSummary }}</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <div class="col-md-5">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Analyst Recommendations (分析师推荐)</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                            <tr>
+                                <th>时间段</th>
+                                <th>强买</th>
+                                <th>买</th>
+                                <th>持有</th>
+                                <th>卖</th>
+                                <th>强卖</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for recommendation in stock_recommendations %}
+                            <tr>
+                                <td class="text-center">{{ recommendation.period_meaning }}</td>
+                                <td class="text-center">{{ recommendation.strongBuy }}</td>
+                                <td class="text-center">{{ recommendation.buy }}</td>
+                                <td class="text-center">{{ recommendation.hold }}</td>
+                                <td class="text-center">{{ recommendation.sell }}</td>
+                                <td class="text-center">{{ recommendation.strongSell }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6">No recommendations available.</td>
+                            </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

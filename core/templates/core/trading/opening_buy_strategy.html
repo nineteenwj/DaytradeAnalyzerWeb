@@ -8,7 +8,7 @@
         <!-- 左边部分：展示股票列表 -->
         <div class="col-md-4">
             <h3>Ticker Info</h3>
-            <div class="card mb-4">
+            <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0"></h5>
                 </div>
@@ -139,16 +139,14 @@
         <!-- 右边部分：展示模拟交易 -->
         <div class="col-md-8">
             <h3>Auto simulation</h3>
-            <div class="card mb-4">
+            <div class="card">
                 <div class="card-header">
-                    <h5 class="mb-0">Opening Trading Strategies</h5>
+                    <h5>Opening Trading Strategies</h5>
                 </div>
                 <div class="card-body">
                     <form id="auto-opening-trading-form" method="post" action="{% url 'opening_auto_simulation' %}"
                           onsubmit="autoOpeningTrade(event)">
-                         {% csrf_token %}
-
-
+                        {% csrf_token %}
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="form-group">
@@ -167,7 +165,9 @@
                                 </div>
                                 <div class="form-group">
                                     <label for="buy_code1" class="bmd-label-floating">Buy Code 1</label>
-                                    {{ form.buy_code1 }}
+                                    <!--input type="text" name="buy_code1" maxlength="10" required="" id="id_buy_code1"  style="width: 120px;"-->
+                                    <div style="width: 120px;">{{ form.buy_code1 }}</div>
+                                    <!--{{ form.buy_code1 }}-->
                                 </div>
                             </div>
                             <div class="col-md-4">
@@ -217,70 +217,76 @@
                 </div>
             </div>
 
-            <div class="card">
+            <!--div class="card">
                 <div class="card-body">
                     <form class="trade-form" method="post" action="{% url 'calculate_profitloss' %}"
                           onsubmit="calculateProfitLoss(event)">
                         {% csrf_token %}
-                        <table class="table table-bordered" id="simulation-table">
-                            <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Pc Code</th>
-                                <th>Strategy</th>
-                                <th>Buy Code</th>
-                                <th>Buy Price</th>
-                                <th>Quantity</th>
-                                <th>Take Profit</th>
-                                <th>Stop Loss</th>
-                                <th>Sell Price</th>
-                                <th style="width: 200px;">Profit/Loss</th>
-                                <th style="width: 200px;">Sell Time</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <!-- 模拟交易行 -->
-                            <tr>
-                                <td><input type="date" name="date" class="form-control" required></td>
-                                <td><input type="text" name="pre_condition_stock_code" class="form-control"
-                                           placeholder="Enter Stock Code" required></td>
-                                <td>
-                                    <select name="strategy" class="form-control" required>
-                                        <option value="pre_market_close">Pre-market Close</option>
-                                        <option value="pre_market_avg">Pre-market Avg</option>
-                                        <option value="pre_market_weighted">Pre-market Weighted</option>
-                                        <option value="intraday_open">Intraday Open</option>
-                                    </select>
-                                </td>
-                                <td><input type="text" name="buy_stock_code" class="form-control"
-                                           placeholder="Enter Buy Stock Code" required></td>
-                                <td><input type="number" name="buy_price" class="form-control"
-                                           placeholder="Enter Buy Price"
-                                           required step="any"></td>
-                                <td><input type="number" name="quantity" class="form-control" value="10" required></td>
-                                <td><input type="number" name="take_profit" class="form-control" value="1" required>
-                                </td>
-                                <td><input type="number" name="stop_loss" class="form-control" value="1" required></td>
-                                <td><input type="text" name="sell_price" class="form-control" readonly></td>
-                                <td><input type="text" name="profit_loss" class="form-control" readonly></td>
-                                <td><input type="text" name="sell_time" class="form-control" readonly></td>
-                            </tr>
-                            </tbody>
-                        </table>
+                        <div class="table-responsive">
+                            <table class="table table-bordered"
+                                   style="width: 100%;border-collapse: collapse; table-layout: auto;"
+                                   id="simulation-table">
+                                <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Pc Code</th>
+                                    <th>Strategy</th>
+                                    <th>Buy Code</th>
+                                    <th>Buy Price</th>
+                                    <th>Quantity</th>
+                                    <th>Take Profit</th>
+                                    <th>Stop Loss</th>
+                                    <th>Sell Price</th>
+                                    <th style="width: 200px;">Profit/Loss</th>
+                                    <th style="width: 200px;">Sell Time</th>
+                                </tr>
+                                </thead>
+                                <tbody>
 
-                        <!-- 提交按钮 -->
+                                <tr>
+                                    <td><input type="date" name="date" class="form-control" required></td>
+                                    <td><input type="text" name="pre_condition_stock_code" class="form-control"
+                                               placeholder="Enter Stock Code" required></td>
+                                    <td>
+                                        <select name="strategy" class="form-control" required>
+                                            <option value="pre_market_close">Pre-market Close</option>
+                                            <option value="pre_market_avg">Pre-market Avg</option>
+                                            <option value="pre_market_weighted">Pre-market Weighted</option>
+                                            <option value="intraday_open">Intraday Open</option>
+                                        </select>
+                                    </td>
+                                    <td><input type="text" name="buy_stock_code" class="form-control"
+                                               placeholder="Enter Buy Stock Code" required></td>
+                                    <td><input type="number" name="buy_price" class="form-control"
+                                               placeholder="Enter Buy Price"
+                                               required step="any"></td>
+                                    <td><input type="number" name="quantity" class="form-control" value="10" required>
+                                    </td>
+                                    <td><input type="number" name="take_profit" class="form-control" value="1" required>
+                                    </td>
+                                    <td><input type="number" name="stop_loss" class="form-control" value="1" required>
+                                    </td>
+                                    <td><input type="text" name="sell_price" class="form-control" readonly></td>
+                                    <td><input type="text" name="profit_loss" class="form-control" readonly></td>
+                                    <td><input type="text" name="sell_time" class="form-control" readonly></td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+
                         <button type="submit" class="btn btn-primary">Simulate Trade</button>
                     </form>
 
-                    <!-- 添加模拟交易行按钮 -->
+
                     <button type="button" class="btn btn-secondary mt-4" onclick="addSimulationRow()">Add Simulation Row
                     </button>
 
-                    <!-- 如果模拟交易的结果不显示在下方表格，可以通过下面的按钮来清空当前显示的内容 -->
+
                     <button type="button" class="btn btn-secondary mt-4" onclick="clearSimulation()">Clear Results
                     </button>
                 </div>
-            </div>
+            </div -->
         </div>
     </div>
 </div>
@@ -555,12 +561,6 @@
             }
         }
     }
-
-
-
-
-
-
 
 </script>
 {% endblock %}

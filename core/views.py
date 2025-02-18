@@ -11,11 +11,13 @@ import pandas as pd
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.conf import settings
-from core.data.querier import get_all_stock_list, add_stock
+from core.data.querier import get_all_stock_list
 from core.trading.strategies import TRADING_STRATEGIES
+from core.data.fetcher import fetch_stock_data
+from core.data.storage import store_stock_data
 
 
-def dashboard(request):
+def dashboard_view(request):
     """
     Display a list of stocks from local storage.
 
@@ -42,6 +44,27 @@ def dashboard(request):
     return render(request, "core/index.html", context)
 
 
+def add_stock(new_stock):
+    stocks = get_all_stock_list()
+    ret = False
+
+    # Check if the new stock is already in the list (case-insensitive)
+    existing_tickers = [stock["ticker"].upper() for stock in stocks]
+    if new_stock in existing_tickers:
+        msg = f"{new_stock} is already added."
+    else:
+        try:
+            from core.data.fetcher import fetch_stock_data
+            # Fetch and store stock data (1-minute data, 7 days)
+            data = fetch_stock_data(new_stock, period="7d", interval="1m")
+            store_stock_data(new_stock, data, settings.CONFIG)
+            msg = f"{new_stock} has been added successfully."
+            ret = True
+        except Exception as e:
+            msg = f"Error adding {new_stock}: {e}"
+            print(msg)
+    return {'ret': ret, 'msg': msg}
+
 
 def update_stock(request, ticker):
     """
@@ -51,13 +74,36 @@ def update_stock(request, ticker):
     """
     if request.method == "POST":
         try:
-            from core.data.fetcher import fetch_stock_data
-            from core.data.storage import store_stock_data
             data = fetch_stock_data(ticker, period="7d", interval="1m")
-            store_stock_data(data, ticker, settings.CONFIG)
+            store_stock_data(ticker, data, settings.CONFIG)
             messages.success(request, f"{ticker} data updated successfully.")
         except Exception as e:
             messages.error(request, f"Error updating {ticker} data: {e}")
     else:
         messages.error(request, "Invalid request method.")
     return redirect("index")
+
+
+def stock_info_view(request, ticker_code):
+    # 获取指定股票的 StockInfo
+    from core.data.fetcher import fetch_company_info, fetch_analyst_recommendations
+    from core.data.storage import store_stock_info, store_analyst_recommendations
+
+    stock_info = fetch_company_info(ticker_code)
+    store_stock_info(ticker_code, stock_info, settings.CONFIG)
+
+    recommendations = fetch_analyst_recommendations(ticker_code)
+    store_analyst_recommendations(ticker_code, recommendations, settings.CONFIG)
+
+    periods_meaning = {
+        '0m': '本月',
+        '-1m': '1个月前',
+        '-2m': '2个月前',
+        '-3m': '3个月前'
+    }
+
+    # Preprocess the recommendations to include period meanings
+    for recommendation in recommendations:
+        recommendation['period_meaning'] = periods_meaning.get(recommendation['period'])
+
+    return render(request, 'core/stock_info.html', {'stock_info': stock_info, 'stock_recommendations': recommendations})

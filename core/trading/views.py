@@ -27,7 +27,7 @@ def get_trading_strategies():
 
 
 
-def swing_buy_strategy(request):
+def swing_buy_strategy_view(request):
     if request.method == 'GET':
         return render(request, "core/trading/swing_buy_strategy.html", {"sim_results": ''})
     else:
@@ -77,7 +77,7 @@ def swing_buy_strategy(request):
         return render(request, "core/trading/swing_buy_strategy.html", {"sim_results": sim_results})
 
 
-def opening_buy_strategy(request):
+def opening_buy_strategy_view(request):
     stocks = get_all_stock_list()
 
     form = TradingOpeningForm()

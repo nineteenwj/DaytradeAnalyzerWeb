@@ -47,7 +47,7 @@ def analysis_index(request):
                     # Fetch stock data (1-minute interval, last 7 days)
                     data = fetch_stock_data(ticker, period="7d", interval="1m")
                     # Store the fetched data locally (CSV or PostgreSQL as per configuration)
-                    store_stock_data(data, ticker, settings.CONFIG)
+                    store_stock_data(ticker, data, settings.CONFIG)
                     messages.success(request, "Stock data fetched and stored successfully.")
 
                     # Read local data to extract available dates.

@@ -3,7 +3,22 @@ Define Django forms for user input.
 """
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
-from .models import CustomUser
+from .models import CustomUser, StockData
+
+class StockDataForm(forms.ModelForm):
+    class Meta:
+        model = StockData
+        fields = ['ticker', 'date', 'open', 'high', 'low', 'close', 'volume']
+        widgets = {
+            'date': forms.DateInput(attrs={'type': 'date'}),  # Use a date picker for the date field
+        }
+
+    def clean_date(self):
+        date = self.cleaned_data.get('date')
+        if not date:
+            raise forms.ValidationError("This field is required.")
+        return date
+
 
 class TickerForm(forms.Form):
     """

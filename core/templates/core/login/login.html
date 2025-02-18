@@ -1,8 +1,14 @@
 <!-- core/templates/core/login.html -->
-{% extends "core/base.html" %}
+<!DOCTYPE html>
+<html lang="en">
 {% load static %}
-
-{% block content %}
+<head>
+    <meta charset="UTF-8">
+    <title>DayTrade Analyzer</title>
+    <!-- Material-Kit CSS (free version from CDN) -->
+    <link href="{% static 'material-kit/css/material-kit.min.css' %}" rel="stylesheet">
+</head>
+<body>
 <div class="page-header align-items-start min-vh-100">
     <div class="container my-auto">
         <div class="row">
@@ -31,10 +37,12 @@
                             </div>
                             <p class="mt-4 text-sm text-center">
                                 Don't have an account?
-                                <a href="{% url 'register' %}" class="text-primary text-gradient font-weight-bold">Sign up</a>
+                                <a href="{% url 'register' %}" class="text-primary text-gradient font-weight-bold">Sign
+                                    up</a>
                             </p>
                             <p class="text-sm text-center">
-                                <a href="{% url 'reset_password' %}" class="text-primary text-gradient font-weight-bold">Forgot password?</a>
+                                <a href="{% url 'reset_password' %}"
+                                   class="text-primary text-gradient font-weight-bold">Forgot password?</a>
                             </p>
                         </form>
                     </div>
@@ -43,4 +51,6 @@
         </div>
     </div>
 </div>
-{% endblock content %}
+<script src="{% static 'material-kit/js/material-kit.min.js' %}"></script>
+</body>
+</html>
